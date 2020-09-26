@@ -16,6 +16,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,16 +29,35 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
-    private String[] mountainName={"Matterhorn","Mont Blanc","Denali"};
-    private String[] locationName={"Alps","Alps","Alaska"};
-    private int[] mountainHeight={4478,4808,6190};
 
-    private ArrayList<String> listData=new ArrayList<>(Arrays.asList(mountainName));
+    ArrayAdapter<String> adapter;
+    private ArrayList<String>mountainName=new ArrayList<String>();
+    private ArrayList<String>mountainLocation=new ArrayList<String>();
+    private ArrayList<Integer> mountainHeight=new ArrayList<Integer>();
     private ArrayList<Mountain> mountainArrayList=new ArrayList<>();
-    Button button;
-    public TextView textView;
+    TextView textView;
+    String s = new String("{\"ID\":" +
+            "\"mobilprog_k2\",\"name\":\"K2\"," +
+            "\"type\":\"a19emigr\",\"company\":\"\"," +
+            "\"location\":\"The Karakoram range\"," +
+            "\"category\":\"\",\"size\":8611,\"cost\":28251," +
+            "\"auxdata\":{\"wiki\":\"https://en.wikipedia.org/wiki/K2\"," +
+            "\"img\":\"https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/K2_2006b.jpg/640px-K2_2006b.jpg\"}}," +
+            "\" +\"{\"ID\":\"mobilprog_kilimanjaro\",\"name\":\"Kilimanjaro\",\"type\":\"a19emigr\"," +
+            "\"company\":\"\",\"location\":\"Tanzania\",\"category\":\"\",\"size\":5885," +
+            "\"cost\":19308,\"auxdata\":{\"wiki\":\"https://en.wikipedia.org/wiki/Mount_Kilimanjaro\"," +
+            "\"img\":\"https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Mount_Kilimanjaro.jpg/640px-Mount_Kilimanjaro.jpg\"}}," +
+            "{\"ID\":\"mobilprog_matterhorn\",\"name\":\"Matterhorn\",\"type\":\"a19emigr\"," +
+            "\"company\":\"\",\"location\":\"The Alps\",\"category\":\"\",\"size\":4478," +
+            "\"cost\":14692,\"auxdata\":{\"wiki\":\"https://en.wikipedia.org/wiki/Matterhorn\"," +
+            "\"img\":\"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Matterhorn_from_Domhütte_-_2.jpg/640px-Matterhorn_from_Domhütte_-_2.jpg\"}}," +
+            "{\"ID\":\"mobilprog_mount_everest\",\"name\":\"Mount Everest\",\"type\":\"a19emigr\"," +
+            "\"company\":\"\",\"location\":\"The Mahalangur Himal sub-range of the Himalayas\"," +
+            "\"category\":\"\",\"size\":8884,\"cost\":29029,\"auxdata\":{\"wiki\":\"https://en.wikipedia.org/wiki/Mount_Everest\"," +
+            "\"img\":\"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/512px-Everest_kalapatthar.jpg\"}}");
 
 
     @Override
@@ -42,26 +65,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,R.layout.list_item_textview,R.id.list_item_textview_xml,listData);
-
-        ListView listView=(ListView) findViewById(R.id.listView);
-
+        adapter=new ArrayAdapter<String>(MainActivity.this,R.layout.list_item_textview,R.id.list_item_textview_xml,mountainName);
+        ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-                Toast.makeText(getApplicationContext(), "Mountain", Toast.LENGTH_SHORT).show();
+            public void onItemClick(AdapterView<?> parent, View view, int i, long id){
+                Toast.makeText(getApplicationContext(),mountainName.get(i) + " ligger i " + mountainLocation.get(i) + " och är " + mountainHeight.get(i) + " hög.", Toast.LENGTH_LONG).show();
             }
         });
-        button=(Button)findViewById(R.id.button);
         textView=(TextView)findViewById(R.id.textView);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new JsonTask().execute("https://wwwlab.iit.his.se/brom/kurser/mobilprog/dbservice/admin/getdataasjson.php?type=brom");
-        }
-        });
+        new JsonTask().execute("https://wwwlab.iit.his.se/brom/kurser/mobilprog/dbservice/admin/getdataasjson.php?type=brom");
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -103,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                     builder.append(line).append("\n");
                 }
                 return builder.toString();
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -119,12 +134,32 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+
+
             return null;
         }
 
         @Override
         protected void onPostExecute(String json) {
-            Log.d("TAG", json);
+            try {
+                JSONArray jsonAr = new JSONArray(json);
+                for (int i = 0; i<jsonAr.length(); i++){
+                    JSONObject jsonObj = jsonAr.getJSONObject(i);
+                    String name = jsonObj.getString("name");
+                    String location = jsonObj.getString("location");
+                    int height = jsonObj.getInt("size");
+                    mountainName.add(name);
+                    mountainLocation.add(location);
+                    mountainHeight.add(height);
+                }
+                adapter.notifyDataSetChanged();
+
+            }
+            catch (JSONException e){
+                Log.d("a19emigr",e.getLocalizedMessage());
+            }
+
+
         }
 
     }
