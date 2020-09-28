@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,15 +27,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
     ArrayAdapter<String> adapter;
     private ArrayList<String>mountainName=new ArrayList<String>();
     private ArrayList<String>mountainLocation=new ArrayList<String>();
-    private ArrayList<Integer> mountainHeight=new ArrayList<Integer>();
+    private ArrayList<Integer>mountainHeight=new ArrayList<Integer>();
     private ArrayList<Mountain> mountainArrayList=new ArrayList<>();
     TextView textView;
     String s = new String("{\"ID\":" +
@@ -71,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int i, long id){
-                Toast.makeText(getApplicationContext(),mountainName.get(i) + " ligger i " + mountainLocation.get(i) + " och är " + mountainHeight.get(i) + " hög.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),mountainName.get(i) + " ligger i " + mountainLocation.get(i) + " och är " + mountainHeight.get(i) + " hög.", Toast.LENGTH_LONG)
+                        .show();
             }
         });
         textView=(TextView)findViewById(R.id.textView);
